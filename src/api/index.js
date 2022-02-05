@@ -1,10 +1,22 @@
 import axios from 'axios';
 
-const baseUrl = 'http://localhost:3000';
+const host = 'http://localhost:3000';
 
-const url = (path) => (new URL(path, baseUrl)).href;
+const apiPath = '/api/v1/';
 
-const header = (token) => ({ 'Authority': `Bearer ${token}` });
+const normalizePath = (path) => {
+  let p = path;
+  if (p.endsWith('/')) p = p.substring(0, p.length - 1);
+  if (p.startsWith('/')) p = p.substring(1);
+  return p;
+};
+
+const url = (path, api = true) => {
+  const fullpath = api ? `${apiPath}${normalizePath(path)}` : path;
+  return (new URL(fullpath, host)).href;
+};
+
+const header = (token) => ({ Authority: `Bearer ${token}` });
 
 const normalizeError = (err) => {
   if (!err) {
@@ -100,3 +112,5 @@ export const updateNote = (token, note) => put(url('/notes'), note, header(token
 export const deleteCategory = (token, id) => destroy(url(`/categories/${id}`), header(token));
 
 export const deleteNote = (token, id) => destroy(url(`/notes/${id}`), header(token));
+
+export const login = (user) => post(url('/auth', false), user);
