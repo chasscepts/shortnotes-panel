@@ -51,7 +51,7 @@ const instantiate = (headers = null) => {
  */
 const get = (path, headers = null) => new Promise((resolve, reject) => {
   instantiate(headers).get(path)
-    .then(({ headers, data }) => resolve({ headers, body: data }))
+    .then(({ data }) => resolve(data))
     .catch((err) => reject(normalizeError(err)));
 });
 
@@ -64,7 +64,7 @@ const get = (path, headers = null) => new Promise((resolve, reject) => {
  */
 const post = (path, data, headers = null) => new Promise((resolve, reject) => {
   instantiate(headers).post(path, data)
-    .then(({ headers, data }) => resolve({ headers, body: data }))
+    .then(({ data }) => resolve(data))
     .catch((err) => reject(normalizeError(err)));
 });
 
@@ -77,7 +77,7 @@ const post = (path, data, headers = null) => new Promise((resolve, reject) => {
  */
 const put = (path, data, headers = null) => new Promise((resolve, reject) => {
   instantiate(headers).put(path, data)
-    .then(({ headers, data }) => resolve({ headers, body: data }))
+    .then(({ data }) => resolve(data))
     .catch((err) => reject(normalizeError(err)));
 });
 
@@ -89,7 +89,7 @@ const put = (path, data, headers = null) => new Promise((resolve, reject) => {
  */
 const destroy = (path, headers = null) => new Promise((resolve, reject) => {
   instantiate(headers).delete(path)
-    .then(({ headers, data }) => resolve({ headers, body: data }))
+    .then(({ data }) => resolve(data))
     .catch((err) => reject(normalizeError(err)));
 });
 
@@ -107,7 +107,7 @@ export const createNote = (token, note) => post(url('/notes'), note, header(toke
 
 export const updateCategory = (token, category) => put(url('/categories'), category, header(token));
 
-export const updateNote = (token, note) => put(url('/notes'), note, header(token));
+export const updateNote = (token, id, note) => put(url(`/notes/${id}`), note, header(token));
 
 export const deleteCategory = (token, id) => destroy(url(`/categories/${id}`), header(token));
 
