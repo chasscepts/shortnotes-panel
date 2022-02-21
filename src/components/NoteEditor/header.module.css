@@ -1,0 +1,94 @@
+.header {
+  background-color: #62b5e5;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+}
+
+.header * {
+  display: flex;
+  align-items: center;
+}
+
+.noteTitle {
+  margin-right: 20px;
+}
+
+.noteTitleBtn {
+  background-color: transparent;
+  color: #e90f0f;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+  border-bottom: 1px dotted #e90f0f;
+}
+
+.fieldset {
+  position: relative;
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.fieldset .legend {
+  position: absolute;
+  top: 0;
+  font-size: 0.8rem;
+  font-weight: bold;
+  line-height: 1;
+  margin: -0.4rem 0 0; /* half of font-size */
+  background-color: #62b5e5;
+  padding: 0 3px;
+}
+
+.fieldset .labelWrap {
+  display: flex;
+}
+
+fieldset .splitLabel {
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+}
+
+.saveNoteBtn {
+  position: relative;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 3px;
+  padding: 6px 10px 6px 30px;
+  background-color: #3bb78f;
+  background-image: linear-gradient(315deg, #3bb78f 0%, #0bab64 74%);
+  cursor: pointer;
+}
+
+.saveNoteBtn:disabled {
+  opacity: 0.4;
+  background-color: #3bb78f;
+  cursor: default;
+}
+
+.saveNoteBtn::before {
+  content: "\2713";
+  position: absolute;
+  left: 10px;
+  top: 0;
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+.saveNoteBtn.saving::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  top: 5px;
+  left: 5px;
+  background-size: 100% 100%;
+  background-image: url(../../assets/images/loading-png.png);
+  animation: rotation 1.2s linear infinite;
+}

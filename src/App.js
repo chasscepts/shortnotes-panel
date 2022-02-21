@@ -1,9 +1,13 @@
-import Panel from './components/Panel';
+import { Provider } from './redux';
+import store from './app/store';
+import LandingPage from './components/LandingPage';
 
 const App = () => (
-  <div>
-    <Panel />
-  </div>
+  <Provider store={store}>
+    <div>
+      <LandingPage />
+    </div>
+  </Provider>
 );
 
 export default App;

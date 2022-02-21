@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const host = 'http://localhost:3000';
+const host = 'http://127.0.0.1:3000';
 
 const apiPath = '/api/v1/';
 
