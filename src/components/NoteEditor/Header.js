@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import propTypes from 'prop-types';
 import css from './header.module.css';
 import { useSelector } from '../../redux';
-import { selectPostingNote } from '../../app/reducers/notesSlice';
-import { noteValidator, requirableValidator } from '../../utilities/prop-validators';
+import { selectCurrentNote, selectPostingNote } from '../../app/reducers/notesSlice';
+import Loader from '../Loader';
 
 /* eslint-disable jsx-a11y/label-has-associated-control */
 const CategoriesSelect = ({ category, categories, onChange }) => {
@@ -11,7 +11,7 @@ const CategoriesSelect = ({ category, categories, onChange }) => {
 
   const handleSelectionChange = ({ target: { value } }) => {
     const val = +value;
-    const cat = categories.select((item) => item.id === val);
+    const cat = categories.find((item) => item.id === val);
     if (!cat) return;
     setSelected(cat);
     onChange(cat);
@@ -48,7 +48,6 @@ CategoriesSelect.defaultProps = {
 
 const Header = ({
   title,
-  note,
   save,
   setInputMode,
   setIsSplit,
@@ -56,8 +55,8 @@ const Header = ({
 }) => {
   const [splitMode, setSplitMode] = useState(true);
   const { loading: saving } = useSelector(selectPostingNote);
-
-  const noteLocalCopy = { ...note };
+  const { item: note } = useSelector(selectCurrentNote);
+  const category = useRef((note && note.category) || categories[0]);
 
   const setSplit = (value) => {
     setSplitMode(value);
@@ -78,66 +77,67 @@ const Header = ({
     if (name === 'edit') {
       setInputMode(true);
     } else if (name === 'save') {
-      if (!noteLocalCopy.category) return;
-      save({ category_id: noteLocalCopy.category.id });
+      if (!category.current) return;
+      save(category.current.id);
     }
   };
 
-  const onCategoryChange = (category) => {
-    noteLocalCopy.category = category;
+  const onCategoryChange = (_category) => {
+    category.current = _category;
   };
 
-  let saveBtnClass = css.saveNoteBtn;
   let doneText;
   if (saving) {
-    saveBtnClass = `${saveBtnClass} ${css.saving}`;
-    doneText = note.id ? 'Updating' : 'Saving';
+    doneText = note && note.id ? 'Updating' : 'Saving';
   } else {
-    doneText = note.id ? 'Update' : 'Save';
+    doneText = note && note.id ? 'Update' : 'Save';
   }
 
   return (
-    <div className={css.header}>
-      <div>
-        <div className={css.categoriesSelectWrap}>
-          <CategoriesSelect
-            category={note.category}
-            categories={categories}
-            onChange={onCategoryChange}
-          />
+    <div className={css.headerWrap}>
+      <div className={css.header}>
+        <div>
+          <div>
+            <h4 className={css.noteTitle}>{title}</h4>
+            <button className={css.noteTitleBtn} name="edit" type="button" onClick={handleClick}>edit title</button>
+          </div>
+          <div className={css.categoriesSelectWrap}>
+            <CategoriesSelect
+              category={category.current}
+              categories={categories}
+              onChange={onCategoryChange}
+            />
+          </div>
+          <div>
+            <fieldset className={css.fieldset}>
+              <span className={css.legend}>Mode</span>
+              <div className={css.labelWrap} role="form">
+                <label className={css.splitLabel}>
+                  <input name="split-view" type="radio" onChange={handleRadioCheck} checked={splitMode} />
+                  <span>Split View</span>
+                </label>
+                <label className={css.splitLabel}>
+                  <input name="editor-view" type="radio" onChange={handleRadioCheck} checked={!splitMode} />
+                  <span>Editor View</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
         </div>
         <div>
-          <h4 className={css.noteTitle}>{title}</h4>
-          <button className={css.noteTitleBtn} name="edit" type="button" onClick={handleClick}>edit</button>
-        </div>
-        <div>
-          <fieldset className={css.fieldset}>
-            <span className={css.legend}>Mode</span>
-            <div className={css.labelWrap} role="form">
-              <label className={css.splitLabel}>
-                <input name="split-view" type="radio" onChange={handleRadioCheck} checked={splitMode} />
-                <span>Split View</span>
-              </label>
-              <label className={css.splitLabel}>
-                <input name="editor-view" type="radio" onChange={handleRadioCheck} checked={!splitMode} />
-                <span>Editor View</span>
-              </label>
-            </div>
-          </fieldset>
+          {saving && (
+            <div className={`${css.saveNoteBtn} ${css.saving}`}>{doneText}</div>
+          )}
+          {!saving && (
+            <button className={css.saveNoteBtn} name="save" type="button" onClick={handleClick}>
+              {doneText}
+            </button>
+          )}
         </div>
       </div>
-      <div>
-        {saving && (
-          <button className={saveBtnClass} name="save" type="button" onClick={handleClick} disabled>
-            {doneText}
-          </button>
-        )}
-        {!saving && (
-          <button className={saveBtnClass} name="save" type="button" onClick={handleClick}>
-            {doneText}
-          </button>
-        )}
-      </div>
+      {saving && (
+        <div className={css.loaderWrap}><Loader /></div>
+      )}
     </div>
   );
 };
@@ -145,7 +145,6 @@ const Header = ({
 
 Header.propTypes = {
   title: propTypes.string.isRequired,
-  note: requirableValidator(noteValidator).isRequired,
   categories: propTypes.arrayOf(propTypes.shape({
     id: propTypes.number,
     name: propTypes.string,

@@ -16,7 +16,7 @@ const url = (path, api = true) => {
   return (new URL(fullpath, host)).href;
 };
 
-const header = (token) => ({ Authority: `Bearer ${token}` });
+const header = (token) => ({ Authorization: token });
 
 const normalizeError = (err) => {
   if (!err) {

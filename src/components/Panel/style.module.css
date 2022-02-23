@@ -21,6 +21,7 @@
   left: 100%;
   transition: all 0.1s linear;
   height: 100vh;
+  padding: 10px 3px;
   background-color: rgb(51, 54, 59);
   overflow-y: auto;
   z-index: 2000;
@@ -28,4 +29,18 @@
 
 .menu.open {
   transform: translate(-100%, 0);
+}
+
+.menuItem {
+  width: 36px;
+  background-color: transparent;
+  margin-bottom: 10px;
+}
+
+.menuItem:last-child {
+  margin-bottom: 0;
+}
+
+.menuItem > img {
+  width: 100%;
 }

@@ -1,13 +1,11 @@
-import propTypes, { arrayOf } from 'prop-types';
+import propTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 import css from './style.module.css';
 import { loadCategoriesAsync, selectCategories } from '../../app/reducers/categoriesSlice';
 import { loadNotesAsync, selectNotes } from '../../app/reducers/notesSlice';
-// import { selectUser } from '../../app/reducers/userSlice';
 import { useDispatch, useSelector } from '../../redux';
 import loadErrorAlert from '../../assets/images/restart-alert.png';
 import successAlert from '../../assets/images/success-alert.png';
-// import LoadingBar from '../LoadingBar';
 import LoginPage from '../LoginPage';
 import screenshot from '../../assets/images/screenshot.gif';
 import logo from '../../assets/images/logo192.png';
@@ -62,7 +60,7 @@ const LoadIndicator = ({ label, items, error }) => {
 
 LoadIndicator.propTypes = {
   label: propTypes.string.isRequired,
-  items: arrayOf(propTypes.oneOfType([
+  items: propTypes.arrayOf(propTypes.oneOfType([
     propTypes.shape({
       id: propTypes.number,
       name: propTypes.string,

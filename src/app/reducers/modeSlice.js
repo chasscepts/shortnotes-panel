@@ -5,7 +5,7 @@ import modes from '../../utilities/modes';
 const slice = createSlice({
   name: 'mode',
   initialState: {
-    current: modes.edit,
+    current: modes.new,
   },
   reducers: {
     setMode: (state, { payload }) => {

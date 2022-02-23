@@ -7,25 +7,41 @@ import LoginPage from '../LoginPage';
 import NoteEditor from '../NoteEditor';
 import { selectUser, setUser } from '../../app/reducers/userSlice';
 import { selectMode, setMode } from '../../app/reducers/modeSlice';
+import newNoteIcon from '../../assets/images/new-note.png';
+import noteList from '../../assets/images/notelist.png';
+import logoutIcon from '../../assets/images/logout.png';
+import ErrorPage from '../ErrorPage';
+import Notes from '../Notes';
+import { setCurrentNote } from '../../app/reducers/notesSlice';
 
-const note = {
-  title: '',
-  content: '',
+const menuItems = { ...modes };
+delete menuItems.edit;
+
+const modeIcons = {
+  logout: logoutIcon,
+  [modes.new]: newNoteIcon,
+  [modes.noteList]: noteList,
 };
 
-const MenuButton = ({ mode, currentMode }) => {
-  const dispatch = useDispatch();
+const MenuButton = ({
+  mode,
+  activeMode,
+  setMode,
+}) => {
+  if (mode === activeMode) return <></>;
 
-  if (mode === currentMode) return <></>;
-
-  const handleClick = () => dispatch(setMode(mode));
-
-  return <button className={css.menuItem} type="button" onClick={handleClick}>{mode}</button>;
+  const handleClick = () => setMode(mode);
+  return (
+    <button className={css.menuItem} type="button" onClick={handleClick}>
+      <img src={modeIcons[mode]} alt={mode} />
+    </button>
+  );
 };
 
 MenuButton.propTypes = {
   mode: propTypes.string.isRequired,
-  currentMode: propTypes.string.isRequired,
+  activeMode: propTypes.string.isRequired,
+  setMode: propTypes.func.isRequired,
 };
 
 const Container = ({ mode, children }) => {
@@ -38,18 +54,32 @@ const Container = ({ mode, children }) => {
 
   const closeMenu = () => showMenu(false);
 
-  const logout = () => dispatch(setUser(null));
+  const setActiveMode = (mode) => {
+    if (mode === 'logout') {
+      dispatch(setUser(null));
+      return;
+    }
+    if (mode === modes.new) {
+      dispatch(setCurrentNote(null));
+    }
+    dispatch(setMode(mode));
+  };
 
   return (
     <div className={css.container}>
+      {children}
       {!menuVisible && <div className={css.showMenuBtn} onMouseEnter={openMenu} />}
       <div className={menuClass} onMouseLeave={closeMenu}>
-        <button type="button" onClick={logout}>logout</button>
-        {Object.keys(modes).map((k) => (
-          <MenuButton key={k} mode={modes[k]} currentMode={mode} setCurrentMode={setMode} />
+        <MenuButton mode="logout" activeMode={mode} icon={logoutIcon} setMode={setActiveMode} />
+        {Object.keys(menuItems).map((k) => (
+          <MenuButton
+            key={k}
+            mode={menuItems[k]}
+            activeMode={mode}
+            setMode={setActiveMode}
+          />
         ))}
       </div>
-      {children}
     </div>
   );
 };
@@ -65,17 +95,25 @@ const Panel = () => {
 
   if (!user) return <LoginPage />;
 
-  if (currentMode === modes.edit) {
+  if (currentMode === modes.new || currentMode === modes.edit) {
     return (
       <Container mode={currentMode}>
-        <NoteEditor note={note} token={user.token} />
+        <NoteEditor />
+      </Container>
+    );
+  }
+
+  if (currentMode === modes.noteList) {
+    return (
+      <Container mode={currentMode}>
+        <Notes />
       </Container>
     );
   }
 
   return (
     <Container mode={currentMode}>
-      <div>Selected Page not Found</div>
+      <ErrorPage error="Selected Page not Found" />
     </Container>
   );
 };

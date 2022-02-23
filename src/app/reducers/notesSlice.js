@@ -36,7 +36,7 @@ const slice = createSlice({
       state.current = { ...state.current, ...payload };
     },
     setPostingNote: (state, { payload }) => {
-      state.editing = { ...state.editing, ...payload };
+      state.posting = { ...state.posting, ...payload };
     },
     setDeletingNote: (state, { payload }) => {
       state.deleting = { ...state.deleting, ...payload };
@@ -48,10 +48,14 @@ const slice = createSlice({
       }
       items.push(payload);
       state.all = { ...state.all, items };
+      state.current = { ...state.current, item: payload };
     },
     removeNote: (state, { payload }) => {
       const items = state.all.items.filter((item) => item.id !== payload);
       state.all = { ...state.all, items };
+      if (state.current.item && state.current.item.id === payload) {
+        state.current = { ...state.current, item: null };
+      }
     },
   },
 });
@@ -83,11 +87,11 @@ export const loadNotesAsync = () => (dispatch, getState) => {
     });
 };
 
-export const createNoteAsync = (token, title, content) => (dispatch) => {
+export const createNoteAsync = (token, title, content, categoryId) => (dispatch) => {
   dispatch(setPostingNote({ loading: true }));
-  createNote(token, { title, content })
+  createNote(token, { title, content, category_id: categoryId })
     .then((note) => {
-      dispatch(addNote({ item: note }));
+      dispatch(addNote(note));
       dispatch(setPostingNote({ loading: false, error: null }));
     })
     .catch((err) => dispatch(setPostingNote({ loading: false, error: err.message })));

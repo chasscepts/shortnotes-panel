@@ -10,7 +10,10 @@ import { useDispatch, useSelector } from '../../redux';
 import {
   createNoteAsync,
   loadNotesAsync,
+  selectCurrentNote,
   selectNotes,
+  selectPostingNote,
+  setPostingNote,
   updateNoteAsync,
 } from '../../app/reducers/notesSlice';
 import {
@@ -19,6 +22,10 @@ import {
 } from '../../app/reducers/categoriesSlice';
 import Header from './Header';
 import LoadingBar from '../LoadingBar';
+import { selectUser } from '../../app/reducers/userSlice';
+import LoginPage from '../LoginPage';
+import ErrorPage from '../ErrorPage';
+import CloseButton from '../CloseButton';
 
 marked.setOptions({
   renderer: new marked.Renderer(),
@@ -243,15 +250,18 @@ SplitPane.propTypes = {
   setContent: propTypes.func.isRequired,
 };
 
-const NoteEditor = ({ note, token }) => {
-  const [title, setTitle] = useState(note.title);
-  const [content, setContent] = useState(note.content);
+const NoteEditor = () => {
+  const { item: note } = useSelector(selectCurrentNote);
+  const [title, setTitle] = useState((note && note.title) || '');
+  const [content, setContent] = useState((note && note.content) || '');
   const [isSplit, setIsSplit] = useState(true);
-  const [inputMode, setInputMode] = useState(!(note.id));
+  const [inputMode, setInputMode] = useState(!(note));
+  const user = useSelector(selectUser);
   const { items: notes, loading: loadingNotes, error: notesError } = useSelector(selectNotes);
   const {
     items: categories, loading: loadingCategories, error: categoriesError,
   } = useSelector(selectCategories);
+  const { error: postError } = useSelector(selectPostingNote);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -262,6 +272,10 @@ const NoteEditor = ({ note, token }) => {
       dispatch(loadNotesAsync());
     }
   }, []);
+
+  if (!user) {
+    return <LoginPage />;
+  }
 
   if (loadingCategories || loadingNotes) {
     return <LoadingBar message="Application loading. Please wait ..." />;
@@ -286,6 +300,17 @@ const NoteEditor = ({ note, token }) => {
     );
   }
 
+  const clearPostError = () => dispatch(setPostingNote({ error: null }));
+
+  if (postError) {
+    return (
+      <div className={css.postErrorContainer}>
+        <ErrorPage error={postError} />
+        <CloseButton className={css.clearPostErrorBtn} onClose={clearPostError} />
+      </div>
+    );
+  }
+
   if (inputMode) {
     const done = (text) => {
       setTitle(text);
@@ -295,14 +320,16 @@ const NoteEditor = ({ note, token }) => {
     return <TextInput label="Enter New Title" onDone={done} initialText={title} />;
   }
 
-  const save = () => {
+  const save = (categoryId) => {
     if (!(title && content)) {
       return;
     }
-    if (note.id) {
-      dispatch(updateNoteAsync(token, { title, content, id: note.id }));
+    if (note) {
+      dispatch(updateNoteAsync(user.token, {
+        title, content, id: note.id, category_id: categoryId,
+      }));
     } else {
-      dispatch(createNoteAsync(token, title, content));
+      dispatch(createNoteAsync(user.token, title, content, categoryId));
     }
   };
 
@@ -310,7 +337,6 @@ const NoteEditor = ({ note, token }) => {
     <div className={css.noteEditor}>
       <Header
         title={title}
-        note={note}
         categories={categories}
         save={save}
         setInputMode={setInputMode}
@@ -326,15 +352,6 @@ const NoteEditor = ({ note, token }) => {
       )}
     </div>
   );
-};
-
-NoteEditor.propTypes = {
-  note: propTypes.shape({
-    id: propTypes.number,
-    title: propTypes.string,
-    content: propTypes.string,
-  }).isRequired,
-  token: propTypes.string.isRequired,
 };
 
 export default NoteEditor;
