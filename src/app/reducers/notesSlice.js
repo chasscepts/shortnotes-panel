@@ -57,6 +57,18 @@ const slice = createSlice({
         state.current = { ...state.current, item: null };
       }
     },
+    updateCurrentNote: (state, { payload }) => {
+      const items = state.all.items.filter((item) => item.id !== payload.id);
+      items.push(payload);
+      state.all = { ...state.all, items };
+      state.current = { ...state.current, item: payload };
+    },
+    removeNotesOfCategory: (state, { payload }) => {
+      if (state.all.items) {
+        const items = state.all.items.filter((item) => item.category.id !== payload);
+        state.all = { ...state.all, items };
+      }
+    },
   },
 });
 /* eslint-enable no-param-reassign */
@@ -68,6 +80,8 @@ export const {
   setPostingNote,
   setDeletingNote,
   removeNote,
+  updateCurrentNote,
+  removeNotesOfCategory,
 } = slice.actions;
 
 export const selectNotes = (state) => state.notes.all;
@@ -97,10 +111,22 @@ export const createNoteAsync = (token, title, content, categoryId) => (dispatch)
     .catch((err) => dispatch(setPostingNote({ loading: false, error: err.message })));
 };
 
-export const updateNoteAsync = (token, note) => (dispatch) => {
+export const updateNoteAsync = (token, id, title, content, category, author) => (dispatch) => {
   dispatch(setPostingNote({ loading: true }));
-  updateNote(token, note.id, note)
+  updateNote(token, {
+    id,
+    title,
+    content,
+    category_id: category.id,
+  })
     .then(() => {
+      dispatch(updateCurrentNote({
+        id,
+        title,
+        content,
+        category,
+        author,
+      }));
       dispatch(setPostingNote({ loading: false, error: null }));
     })
     .catch((err) => dispatch(setPostingNote({ loading: false, error: err.message })));
@@ -117,6 +143,22 @@ export const fetchNoteAsync = (id) => (dispatch, getState) => {
     .then((note) => {
       dispatch(setCurrentNote({ item: note, loading: false, error: null }));
       dispatch(addNote(note));
+    })
+    .catch((err) => dispatch(setCurrentNote({ loading: false, error: err.message })));
+};
+
+export const fetchContentAsync = (note) => (dispatch) => {
+  if (note.content) {
+    dispatch(setCurrentNote({ item: note }));
+    return;
+  }
+  dispatch(setCurrentNote({ loading: true }));
+  getNote(note.id)
+    .then((newNote) => {
+      /* eslint-disable no-param-reassign */
+      note.content = newNote.content;
+      /* eslint-enable no-param-reassign */
+      dispatch(setCurrentNote({ item: note, loading: false, error: null }));
     })
     .catch((err) => dispatch(setCurrentNote({ loading: false, error: err.message })));
 };

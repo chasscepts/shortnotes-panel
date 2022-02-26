@@ -4,9 +4,7 @@ import LandingPage from './components/LandingPage';
 
 const App = () => (
   <Provider store={store}>
-    <div>
-      <LandingPage />
-    </div>
+    <LandingPage />
   </Provider>
 );
 

@@ -1,0 +1,124 @@
+.container {
+  width: 100%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 15px;
+}
+
+.selectedContainer {
+  margin: 3px 3px 15px;
+  padding: 10px;
+  border: 1px solid #eee;
+}
+
+.selectedHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heading {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.newBtn {
+  background-color: transparent;
+  width: 18px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.newBtn > img {
+  width: 100%;
+}
+
+.selectedForm {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.nameInput {
+  flex: 1;
+  padding: 5px 10px;
+}
+
+.formControls {
+  display: flex;
+}
+
+.formControls > button {
+  margin-left: 10px;
+}
+
+@media (min-width: 230px) {
+  .list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 320px) {
+  .list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 425px) {
+  .list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 576px) {
+  .list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .listWrap {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1400px) {
+  .list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

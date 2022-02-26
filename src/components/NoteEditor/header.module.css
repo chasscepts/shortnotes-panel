@@ -75,6 +75,7 @@ fieldset .splitLabel {
   background-color: #3bb78f;
   background-image: linear-gradient(315deg, #3bb78f 0%, #0bab64 74%);
   cursor: pointer;
+  margin-right: 20px;
 }
 
 .saveNoteBtn.saving {
@@ -113,6 +114,10 @@ fieldset .splitLabel {
   background-color: #1b92e2;
   color: #fff;
   border: 1px solid #eee;
+}
+
+.closeBtn {
+  margin: 0 20px 0 30px;
 }
 
 @keyframes rotation {

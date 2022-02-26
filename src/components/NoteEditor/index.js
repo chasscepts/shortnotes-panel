@@ -9,23 +9,15 @@ import css from './style.module.css';
 import { useDispatch, useSelector } from '../../redux';
 import {
   createNoteAsync,
-  loadNotesAsync,
   selectCurrentNote,
-  selectNotes,
   selectPostingNote,
   setPostingNote,
   updateNoteAsync,
 } from '../../app/reducers/notesSlice';
-import {
-  loadCategoriesAsync,
-  selectCategories,
-} from '../../app/reducers/categoriesSlice';
+import { selectCategories } from '../../app/reducers/categoriesSlice';
 import Header from './Header';
-import LoadingBar from '../LoadingBar';
 import { selectUser } from '../../app/reducers/userSlice';
-import LoginPage from '../LoginPage';
 import ErrorPage from '../ErrorPage';
-import CloseButton from '../CloseButton';
 
 marked.setOptions({
   renderer: new marked.Renderer(),
@@ -239,6 +231,7 @@ const SplitPane = ({ content, setContent }) => {
         <ColumnResizer leftWidth={leftWidth} minWidth={300} setWidth={setLeftWidth} />
       )}
       <div className={`${css.mainResizeWrap} ${css.displayWrap}`}>
+        {/* eslint-disable-next-line react/no-danger */}
         <div className={css.display} dangerouslySetInnerHTML={{ __html: html }} />
       </div>
     </div>
@@ -252,63 +245,23 @@ SplitPane.propTypes = {
 
 const NoteEditor = () => {
   const { item: note } = useSelector(selectCurrentNote);
-  const [title, setTitle] = useState((note && note.title) || '');
-  const [content, setContent] = useState((note && note.content) || '');
+  const [title, setTitle] = useState(note.title);
+  const [content, setContent] = useState(note.content);
   const [isSplit, setIsSplit] = useState(true);
-  const [inputMode, setInputMode] = useState(!(note));
+  const [inputMode, setInputMode] = useState(!(note.id));
   const user = useSelector(selectUser);
-  const { items: notes, loading: loadingNotes, error: notesError } = useSelector(selectNotes);
-  const {
-    items: categories, loading: loadingCategories, error: categoriesError,
-  } = useSelector(selectCategories);
+  const { items: categories } = useSelector(selectCategories);
   const { error: postError } = useSelector(selectPostingNote);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!(categories || categoriesError || loadingCategories)) {
-      dispatch(loadCategoriesAsync);
-    }
-    if (!(notes || notesError || loadingNotes)) {
-      dispatch(loadNotesAsync());
-    }
-  }, []);
-
   if (!user) {
-    return <LoginPage />;
-  }
-
-  if (loadingCategories || loadingNotes) {
-    return <LoadingBar message="Application loading. Please wait ..." />;
-  }
-
-  let error = categoriesError;
-  if (error && notesError) {
-    error = `${error}\n${notesError}`;
-  } else if (notesError) {
-    error = notesError;
-  }
-
-  if (error) {
-    return (
-      <div>
-        <h2>An error occurred while loading application</h2>
-        <div>{error}</div>
-        <div>
-          Please reload your browser as the application will not work properly in this state
-        </div>
-      </div>
-    );
+    return <ErrorPage error="You must be logged in to access this page!" />;
   }
 
   const clearPostError = () => dispatch(setPostingNote({ error: null }));
 
   if (postError) {
-    return (
-      <div className={css.postErrorContainer}>
-        <ErrorPage error={postError} />
-        <CloseButton className={css.clearPostErrorBtn} onClose={clearPostError} />
-      </div>
-    );
+    return <ErrorPage error={postError} onClose={clearPostError} />;
   }
 
   if (inputMode) {
@@ -320,16 +273,14 @@ const NoteEditor = () => {
     return <TextInput label="Enter New Title" onDone={done} initialText={title} />;
   }
 
-  const save = (categoryId) => {
+  const save = (category) => {
     if (!(title && content)) {
       return;
     }
-    if (note) {
-      dispatch(updateNoteAsync(user.token, {
-        title, content, id: note.id, category_id: categoryId,
-      }));
+    if (note.id) {
+      dispatch(updateNoteAsync(user.token, note.id, title, content, category, note.author));
     } else {
-      dispatch(createNoteAsync(user.token, title, content, categoryId));
+      dispatch(createNoteAsync(user.token, title, content, category.id));
     }
   };
 

@@ -2,6 +2,7 @@ import {
   createCategory, deleteCategory, getCategories, updateCategory,
 } from '../../api';
 import createSlice from '../../redux/create-slice';
+import { removeNotesOfCategory } from './notesSlice';
 
 /* eslint-disable no-param-reassign */
 const slice = createSlice({
@@ -22,28 +23,41 @@ const slice = createSlice({
       error: null,
       loading: false,
     },
+    current: {
+      id: 0,
+      name: '',
+    },
   },
   reducers: {
     setCategories: (state, { payload }) => {
       state.all = { ...state.all, ...payload };
     },
+    setCurrentCategory: (state, { payload }) => {
+      state.current = payload;
+    },
+    updateCurrentCategory: (state, { payload }) => {
+      state.current.name = payload.name;
+      state.current = { ...payload };
+      state.posting = { ...state.posting, error: null, loading: false };
+    },
     setPostingCategory: (state, { payload }) => {
-      state.editing = { ...state.editing, ...payload };
+      state.posting = { ...state.posting, ...payload };
     },
     setDeletingCategory: (state, { payload }) => {
       state.deleting = { ...state.deleting, ...payload };
     },
     addCategory: (state, { payload }) => {
-      let { all: { items } } = state;
-      if (!items) {
-        items = [];
-      }
+      const items = state.all.items ? [...state.all.items] : [];
       items.push(payload);
       state.all = { ...state.all, items };
+      state.current = payload;
     },
     removeCategory: (state, { payload }) => {
       const items = state.all.items.filter((item) => item.id !== payload);
       state.all = { ...state.all, items };
+      if (state.current.id === payload) {
+        state.current = { id: 0, name: '' };
+      }
     },
   },
 });
@@ -51,6 +65,8 @@ const slice = createSlice({
 
 export const {
   setCategories,
+  setCurrentCategory,
+  updateCurrentCategory,
   addCategory,
   setPostingCategory,
   setDeletingCategory,
@@ -58,6 +74,7 @@ export const {
 } = slice.actions;
 
 export const selectCategories = (state) => state.categories.all;
+export const selectCurrentCategory = (state) => state.categories.current;
 export const selectPostingCategory = (state) => state.categories.posting;
 export const selectDeletingCategory = (state) => state.categories.deleting;
 
@@ -73,11 +90,11 @@ export const loadCategoriesAsync = () => (dispatch, getState) => {
     });
 };
 
-export const createCategoriesAsync = (token, name) => (dispatch) => {
+export const createCategoryAsync = (token, name) => (dispatch) => {
   dispatch(setPostingCategory({ loading: true }));
   createCategory(token, { name })
-    .then((item) => {
-      dispatch(addCategory({ item }));
+    .then((category) => {
+      dispatch(addCategory(category));
       dispatch(setPostingCategory({ loading: false, error: null }));
     })
     .catch((err) => dispatch(setPostingCategory({ loading: false, error: err.message })));
@@ -85,9 +102,9 @@ export const createCategoriesAsync = (token, name) => (dispatch) => {
 
 export const updateCategoryAsync = (token, category) => (dispatch) => {
   dispatch(setPostingCategory({ loading: true }));
-  updateCategory(token, category.id, category)
+  updateCategory(token, category)
     .then(() => {
-      dispatch(setPostingCategory({ loading: false, error: null }));
+      dispatch(updateCurrentCategory(category));
     })
     .catch((err) => dispatch(setPostingCategory({ loading: false, error: err.message })));
 };
@@ -97,6 +114,7 @@ export const deleteCategoryAsync = (token, id) => (dispatch) => {
   deleteCategory(token, id)
     .then(() => {
       dispatch(removeCategory(id));
+      dispatch(removeNotesOfCategory(id));
       dispatch(setDeletingCategory({ loading: false, item: null }));
     })
     .catch((err) => dispatch(setDeletingCategory({ loading: false, error: err.message })));

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const host = 'http://127.0.0.1:3000';
+const host = 'https://shortnotes-api.herokuapp.com';
 
 const apiPath = '/api/v1/';
 
@@ -107,7 +107,7 @@ export const createNote = (token, note) => post(url('/notes'), note, header(toke
 
 export const updateCategory = (token, category) => put(url('/categories'), category, header(token));
 
-export const updateNote = (token, id, note) => put(url(`/notes/${id}`), note, header(token));
+export const updateNote = (token, note) => put(url(`/notes/${note.id}`), note, header(token));
 
 export const deleteCategory = (token, id) => destroy(url(`/categories/${id}`), header(token));
 

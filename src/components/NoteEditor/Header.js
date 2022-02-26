@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 import propTypes from 'prop-types';
 import css from './header.module.css';
-import { useSelector } from '../../redux';
-import { selectCurrentNote, selectPostingNote } from '../../app/reducers/notesSlice';
-import Loader from '../Loader';
+import { useDispatch, useSelector } from '../../redux';
+import { selectCurrentNote, selectPostingNote, setCurrentNote } from '../../app/reducers/notesSlice';
+import LoadingBar from '../LoadingBar';
+import CloseButton from '../CloseButton';
+import LogoutButton from '../LogoutButton';
 
 /* eslint-disable jsx-a11y/label-has-associated-control */
 const CategoriesSelect = ({ category, categories, onChange }) => {
@@ -18,9 +20,8 @@ const CategoriesSelect = ({ category, categories, onChange }) => {
   };
 
   return (
-    <div>
+    <div className="select">
       <select
-        className={css.categoriesSelect}
         value={selected && selected.id}
         onChange={handleSelectionChange}
       >
@@ -56,7 +57,8 @@ const Header = ({
   const [splitMode, setSplitMode] = useState(true);
   const { loading: saving } = useSelector(selectPostingNote);
   const { item: note } = useSelector(selectCurrentNote);
-  const category = useRef((note && note.category) || categories[0]);
+  const category = useRef(note.category || categories[0]);
+  const dispatch = useDispatch();
 
   const setSplit = (value) => {
     setSplitMode(value);
@@ -78,7 +80,7 @@ const Header = ({
       setInputMode(true);
     } else if (name === 'save') {
       if (!category.current) return;
-      save(category.current.id);
+      save(category.current);
     }
   };
 
@@ -92,6 +94,8 @@ const Header = ({
   } else {
     doneText = note && note.id ? 'Update' : 'Save';
   }
+
+  const handleClose = () => dispatch(setCurrentNote({ item: null }));
 
   return (
     <div className={css.headerWrap}>
@@ -133,10 +137,12 @@ const Header = ({
               {doneText}
             </button>
           )}
+          <CloseButton className={css.closeBtn} onClose={handleClose} />
+          <LogoutButton />
         </div>
       </div>
       {saving && (
-        <div className={css.loaderWrap}><Loader /></div>
+        <div className={css.loaderWrap}><LoadingBar /></div>
       )}
     </div>
   );
