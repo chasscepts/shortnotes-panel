@@ -1,0 +1,27 @@
+.btn {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  background-color: transparent;
+  position: relative;
+}
+
+.btn::before,
+.btn::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 2px;
+  width: 100%;
+  background-color: #cf1313;
+  transform-origin: center;
+}
+
+.btn::before {
+  transform: rotate(45deg);
+}
+
+.btn::after {
+  transform: rotate(-45deg);
+}

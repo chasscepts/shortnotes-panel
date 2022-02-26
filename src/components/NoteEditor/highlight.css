@@ -1,0 +1,40 @@
+pre {
+  position: relative;
+  padding: 20px;
+  background-color: #f3f7f7;
+  border: 1px solid #c2d5d9;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+code {
+  display: inline-block;
+  padding: 3px;
+  border-radius: 3px;
+  background-color: #b7c9c9;
+  background-color: #f3f7f7;
+  border: 1px solid #c2d5d9;
+}
+
+pre > code {
+  display: block;
+  padding: 0;
+  border-radius: 0;
+  background-color: transparent;
+  border: none;
+}
+
+.code-file-header {
+  border-radius: 5px 5px 0 0;
+  padding: 8px 15px;
+  margin-top: 15px;
+  line-height: 1;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #1a3850;
+  background-color: #c9d3d3;
+}
+
+.code-file-header + pre {
+  margin-top: 0;
+}
